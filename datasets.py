@@ -22,7 +22,9 @@ log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
 
 raw_cache = getCache('luna_raw')
-data_dir  = Path.cwd().parent / "LUNA"
+
+# We work within the directory with the raw data.
+data_dir  = str(Path.cwd())
 
 CandidateInfoTuple = namedtuple(
     'CandidateInfoTuple',
@@ -37,7 +39,8 @@ def getCandidateInfoList(requireOnDisk_bool=True):
     mhd_list = glob.glob('../LUNA/subset*/*.mhd')
     presentOnDisk_set = {os.path.split(p)[-1][:-4] for p in mhd_list}
 
-    diameter_dict = {}
+    diameter_dict = {} # Define the dictionary.
+
     with open('../LUNA/annotations.csv', "r") as f:
         for row in list(csv.reader(f))[1:]:
             series_uid = row[0]
@@ -46,10 +49,12 @@ def getCandidateInfoList(requireOnDisk_bool=True):
 
             diameter_dict.setdefault(series_uid, []).append(
                 (annotationCenter_xyz, annotationDiameter_mm)
-            )
+            ) # Use the setdefault dictionary method to either create a new list for a series_uid
+              # or append the annotations to an existing one.
 
     candidateInfo_list = []
-    with open('../LUNA/candidates.csv', "r") as f:
+
+    with open('../LUNA/candidates_V2.csv', "r") as f:
         for row in list(csv.reader(f))[1:]:
             series_uid = row[0]
 
@@ -60,6 +65,7 @@ def getCandidateInfoList(requireOnDisk_bool=True):
             candidateCenter_xyz = tuple([float(x) for x in row[1:4]])
 
             candidateDiameter_mm = 0.0
+
             for annotation_tup in diameter_dict.get(series_uid, []):
                 annotationCenter_xyz, annotationDiameter_mm = annotation_tup
                 for i in range(3):
@@ -79,3 +85,27 @@ def getCandidateInfoList(requireOnDisk_bool=True):
 
     candidateInfo_list.sort(reverse=True)
     return candidateInfo_list
+
+
+class Ct:
+    def __init__(self, series_uid):
+        mhd_path = glob(
+            f"{data_dir}/subset*/{series_uid}.mhd"
+        )[0]
+        # Gets the path as a string.
+
+        ct_mhd = sitk.ReadImage(mhd_path)
+        ct_a = np.array(sitk.GetArrayFromImage(ct_mhd), dtype=np.float32)
+
+        ct_a.clip(-1000, 1000, ct_a)
+
+        self.series_uid = series_uid
+        self.hu_a = ct_a
+
+        self.origin_xyz = XyzTuple(*ct_mhd.GetOrigin())
+        self.vxSize_xyz = XyzTuple(*ct_mhd.GetSpacing())
+        self.direction_a = np.array(ct_mhd.GetDirection()).reshape(3, 3)
+
+
+    def getRawCandidate(self, center_xyz, width_irc):
+        pass
