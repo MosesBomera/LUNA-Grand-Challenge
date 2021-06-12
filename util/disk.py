@@ -3,11 +3,15 @@ import gzip
 from diskcache import FanoutCache, Disk
 from diskcache.core import BytesType, MODE_BINARY, BytesIO
 
+from pathlib import Path
+
 from util.logconf import logging
 log = logging.getLogger(__name__)
 # log.setLevel(logging.WARN)
 log.setLevel(logging.INFO)
 # log.setLevel(logging.DEBUG)
+
+data_dir  = str(Path.cwd().parent.parent)
 
 
 class GzipDisk(Disk):
@@ -78,7 +82,7 @@ class GzipDisk(Disk):
         return value
 
 def getCache(scope_str):
-    return FanoutCache('../LUNA/cache/' + scope_str,
+    return FanoutCache(f'{data_dir}/cache/' + scope_str,
                        disk=GzipDisk,
                        shards=64,
                        timeout=1,

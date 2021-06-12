@@ -37,12 +37,12 @@ def getCandidateInfoList(requireOnDisk_bool=True):
     # We construct a set with all series_uids that are present on disk.
     # This will let us use the data, even if we haven't downloaded all of
     # the subsets yet.
-    mhd_list = glob.glob('../LUNA/subset*/*.mhd')
+    mhd_list = glob.glob(f'{data_dir}/subset*/*.mhd')
     presentOnDisk_set = {os.path.split(p)[-1][:-4] for p in mhd_list}
 
     diameter_dict = {} # Define the dictionary.
 
-    with open('../LUNA/annotations.csv', "r") as f:
+    with open(f'{data_dir}/annotations.csv', "r") as f:
         for row in list(csv.reader(f))[1:]:
             series_uid = row[0]
             annotationCenter_xyz = tuple([float(x) for x in row[1:4]])
@@ -55,7 +55,7 @@ def getCandidateInfoList(requireOnDisk_bool=True):
 
     candidateInfo_list = []
 
-    with open('../LUNA/candidates_V2.csv', "r") as f:
+    with open(f'{data_dir}/candidates_V2.csv', "r") as f:
         for row in list(csv.reader(f))[1:]:
             series_uid = row[0]
 
