@@ -24,7 +24,8 @@ log.setLevel(logging.DEBUG)
 raw_cache = getCache('luna_raw')
 
 # We work within the directory with the raw data.
-data_dir  = str(Path.cwd())
+## LOOK OUT FOR THIS PART.
+data_dir  = str(Path.cwd().parent)
 
 CandidateInfoTuple = namedtuple(
     'CandidateInfoTuple',
@@ -89,7 +90,7 @@ def getCandidateInfoList(requireOnDisk_bool=True):
 
 class Ct:
     def __init__(self, series_uid):
-        mhd_path = glob(
+        mhd_path = glob.glob(
             f"{data_dir}/subset*/{series_uid}.mhd"
         )[0]
         # Gets the path as a string.
@@ -97,6 +98,10 @@ class Ct:
         ct_mhd = sitk.ReadImage(mhd_path)
         ct_a = np.array(sitk.GetArrayFromImage(ct_mhd), dtype=np.float32)
 
+        # CTs are natively expressed in https://en.wikipedia.org/wiki/Hounsfield_scale
+        # HU are scaled oddly, with 0 g/cc (air, approximately) being -1000 and 1 g/cc (water) being 0.
+        # The lower bound gets rid of negative density stuff used to indicate out-of-FOV
+        # The upper bound nukes any weird hotspots and clamps bone down.
         ct_a.clip(-1000, 1000, ct_a)
 
         self.series_uid = series_uid
@@ -108,4 +113,32 @@ class Ct:
 
 
     def getRawCandidate(self, center_xyz, width_irc):
-        pass
+        center_irc = xyz2irx(
+            center_xyz,
+            self.origin_xyz,
+            self.vxsize_xyz,
+            self.direction_a,
+        )
+
+        slice_list = []
+
+        for axis, center_val in enumerate(center_irc):
+            start_ndx = int(round(center_val - width_irc[axis]/2))
+            end_ndx = int(start_ndx + width_irc[axis])
+            
+            # Check that the center value is within the ct array.
+            assert center_val >= 0 and center_val < self.hu_a.shape[axis], repr([self.series_uid, center_xyz, self.origin_xyz, self.vxSize_xyz, center_irc, axis])
+
+            if start_ndx < 0:
+                start_ndx = 0
+                end_ndx = int(width_irc[axis])
+
+            if end_ndx > self.hu_a.shape[axis]:
+                end_ndx = self.hu_a.shape[axis]
+                start_ndx = int(self.hu_a.shape[axis] - width_irc[axis])
+
+            slice_list.append(slice(start_ndx, end_ndx))
+
+        ct_chunk = self.hu_a[tuple(slice_list)]
+        
+        return ct_chunk, center_irc
