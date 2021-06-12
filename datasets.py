@@ -116,7 +116,7 @@ class Ct:
         center_irc = xyz2irc(
             center_xyz,
             self.origin_xyz,
-            self.vxsize_xyz,
+            self.vxSize_xyz,
             self.direction_a,
         )
 
@@ -174,7 +174,7 @@ class LunaDataset(Dataset):
         if isValSet_bool:
             assert val_stride > 0, val_stride
             self.candidateInfo_list = self.candidateInfo_list[::val_stride] # Starting with the first candidate, get every 
-                                                                            # val_stride candidate
+                                                                            # val_stride-th candidate
             assert self.candidateInfo_list
         elif val_stride > 0:
             del self.candidateInfo_list[::val_stride]
