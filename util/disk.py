@@ -9,6 +9,9 @@ log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
 # log.setLevel(logging.DEBUG)
 
+# Cache Directory
+data_dir  = str(Path.cwd().parent.parent)
+
 
 class GzipDisk(Disk):
     def store(self, value, read, key=None):
@@ -78,7 +81,7 @@ class GzipDisk(Disk):
         return value
 
 def getCache(scope_str):
-    return FanoutCache('cache/' + scope_str,
+    return FanoutCache(f'{data_dir}/cache/' + scope_str,
                        disk=GzipDisk,
                        shards=64,
                        timeout=1,
