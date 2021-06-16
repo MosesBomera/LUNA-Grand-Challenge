@@ -9,7 +9,7 @@ import numpy as np
 from torch.utils.tensorboard import SummaryWriter
 
 import torch
-import toch.nn as nn
+import torch.nn as nn
 from torch.optim import SGD, Adam
 from torch.utils.data import DataLoader
 
@@ -353,3 +353,6 @@ class LunaTrainingApp:
                 self.totalTrainingSamples_count,
                 bins=bins,
             )
+
+if __name__ == '__main__':
+    LunaTrainingApp().main()
