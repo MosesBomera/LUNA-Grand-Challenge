@@ -187,7 +187,7 @@ class LunaDataset(Dataset):
         ))
 
     def __len__(self):
-        return len(self.getCandidateInfoList)
+        return len(self.candidateInfo_list)
 
     def __getitem__(self, ndx):
         # Index the, or so to say, get the candidate from the list.

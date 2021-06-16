@@ -61,7 +61,7 @@ class LunaBlock(nn.Module):
     def __init__(self, in_channels, conv_channels):
         super().__init__()
 
-        self.conv1 = conv3d(
+        self.conv1 = nn.Conv3d(
             in_channels, conv_channels, kernel_size=3, padding=1, bias=True,
         )
         self.relu1 = nn.ReLU(inplace=True)

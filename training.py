@@ -155,7 +155,7 @@ class LunaTrainingApp:
                 epoch_ndx,
                 self.cli_args.epochs,
                 len(train_dl),
-                len(val_df),
+                len(val_dl),
                 self.cli_args.batch_size,
                 (torch.cuda.device_count if self.use_cuda else 1)
             ))
