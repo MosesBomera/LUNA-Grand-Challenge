@@ -25,7 +25,7 @@ raw_cache = getCache('luna_raw')
 
 # We work within the directory with the raw data.
 ## LOOK OUT FOR THIS PART.
-data_dir  = str(Path.cwd().parent)
+data_dir  = '/datadrive/LUNA'
 
 CandidateInfoTuple = namedtuple(
     'CandidateInfoTuple',
