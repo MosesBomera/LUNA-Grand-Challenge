@@ -40,9 +40,9 @@ class LunaModel(nn.Module):
 
 
     def forward(self, input_batch):
-        bn_output = self.tail_batchnorm(input_batch)
+        bn_output = self.tail_batchnorm(input_batch) # Model Tail
 
-        block_out = self.block1(bn_output)
+        block_out = self.block1(bn_output) # Backbone
         block_out = self.block2(block_out)
         block_out = self.block3(block_out)
         block_out = self.block4(block_out)
@@ -52,7 +52,7 @@ class LunaModel(nn.Module):
             -1
         )
 
-        linear_output = self.head_linear(conv_flat)
+        linear_output = self.head_linear(conv_flat) # Head
 
         return linear_output, self.head_softmax(linear_output)
 

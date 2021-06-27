@@ -173,8 +173,8 @@ class LunaTrainingApp:
     
     def doTraining(self, epoch_ndx, train_dl):
         self.model.train() # Sets the mode to training.
-        trnMetrics_g = torch.zeros(
-            METRICS_SIZE,
+        trnMetrics_g = torch.zeros(  # Initializes a zeros metrics array.
+            METRICS_SIZE,  
             len(train_dl.dataset),
             device=self.device
         )
@@ -195,7 +195,7 @@ class LunaTrainingApp:
                 trnMetrics_g
             )
 
-            loss_var.backward()
+            loss_var.backward()   # Actual weight updates.
             self.optimizer.step()
 
         self.totalTrainingSamples_count += len(train_dl.dataset)
@@ -205,7 +205,7 @@ class LunaTrainingApp:
 
     def doValidation(self, epoch_ndx, val_dl):
         with torch.no_grad():
-            self.model_eval()
+            self.model_eval() # Sets mode to evaluation.
             valMetrics_g = torch.zeros(
                 METRICS_SIZE,
                 len(val_dl.dataset),
@@ -234,11 +234,12 @@ class LunaTrainingApp:
 
         logits_g, probability_g = self.model(input_g)
 
-        loss_func = nn.CrossEntropyLoss(reduction="none")
+        loss_func = nn.CrossEntropyLoss(reduction="none") # Callable classes
         loss_g = loss_func(
             logits_g,
             label_g[:, 1],
         )
+
         start_ndx = batch_ndx * batch_size
         end_ndx = start_ndx + label_t.size(0)
 
