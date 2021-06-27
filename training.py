@@ -121,7 +121,7 @@ class LunaTrainingApp:
 
         batch_size = self.cli_args.batch_size
         if self.use_cuda:
-            batch_size *= torch.cude.device_count()
+            batch_size *= torch.cuda.device_count()
 
         val_dl = DataLoader(
             val_ds,
