@@ -2,8 +2,6 @@ import argparse
 import datetime
 import os
 import sys
-
-
 import numpy as np
 
 from torch.utils.tensorboard import SummaryWriter
@@ -13,10 +11,10 @@ import torch.nn as nn
 from torch.optim import SGD, Adam
 from torch.utils.data import DataLoader
 
-from util.util import enumerateWithEstimate
-from datasets import LunaDataset
-from util.logconf import logging
-from model import LunaModel
+from .util.util import enumerateWithEstimate
+from .datasets import LunaDataset
+from .util.logconf import logging
+from .model import LunaModel
 
 
 log = logging.getLogger(__name__)
@@ -205,7 +203,7 @@ class LunaTrainingApp:
 
     def doValidation(self, epoch_ndx, val_dl):
         with torch.no_grad():
-            self.model_eval() # Sets mode to evaluation.
+            self.model.eval() # Sets mode to evaluation.
             valMetrics_g = torch.zeros(
                 METRICS_SIZE,
                 len(val_dl.dataset),
