@@ -14,25 +14,25 @@ import torch
 import torch.cuda
 from torch.utils.data import Dataset
 
-from util.disk import getCache
-from util.util import XyzTuple, xyz2irc
-from util.logconf import logging
+# from util.disk import getCache
+from .util.util import XyzTuple, xyz2irc
+from .util.logconf import logging
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
 
-raw_cache = getCache('luna_raw')
+# raw_cache = getCache('luna_raw')
 
 # We work within the directory with the raw data.
 ## LOOK OUT FOR THIS PART.
-data_dir  = '/datadrive/LUNA'
+data_dir  = '/content/luna_dataset'
 
 CandidateInfoTuple = namedtuple(
     'CandidateInfoTuple',
     'isNodule_bool, diameter_mm, series_uid, center_xyz',
 )
 
-@functools.lru_cache(1)
+# @functools.lru_cache(1)
 def getCandidateInfoList(requireOnDisk_bool=True):
     # We construct a set with all series_uids that are present on disk.
     # This will let us use the data, even if we haven't downloaded all of
@@ -144,12 +144,12 @@ class Ct:
         return ct_chunk, center_irc
 
 
-@functools.lru_cache(1, typed=True)
+# @functools.lru_cache(1, typed=True)
 def getCt(series_uid):
     return Ct(series_uid)
 
 
-@raw_cache.memoize(typed=True)
+# @raw_cache.memoize(typed=True)
 def getCtRawCandidate(series_uid, center_xyz, width_irc):
     ct = getCt(series_uid)
     ct_chunk, center_irc = ct.getRawCandidate(center_xyz, width_irc)
