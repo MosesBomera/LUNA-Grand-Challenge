@@ -288,7 +288,29 @@ class LunaTrainingApp:
             / np.float32(metrics_t.shape[1]) * 100
         metrics_dict['correct/neg'] = neg_correct / np.float32(neg_count) * 100
         metrics_dict['correct/pos'] = pos_correct / np.float32(pos_count) * 100
+        
+        # Add precision and recall metrics
+        precision = metrics_dict['pr/precision'] = \
+            truePos_count / np.float32(truePos_count + falsePos_count)
+        recall    = metrics_dict['pr/recall'] = \
+            truePos_count / np.float32(truePos_count + falseNeg_count)
 
+        metrics_dict['pr/f1_score'] = \
+            2 * (precision * recall) / (precision + recall)
+        
+        log.info(
+            ("E{} {:8} {loss/all:.4f} loss, "
+                 + "{correct/all:-5.1f}% correct, "
+                 + "{pr/precision:.4f} precision, "
+                 + "{pr/recall:.4f} recall, "
+                 + "{pr/f1_score:.4f} f1 score"
+            ).format(
+                epoch_ndx,
+                mode_str,
+                **metrics_dict,
+            )
+        )
+        
         log.info(
             ("E{} {:8} {loss/all:.4f} loss, "
                  + "{correct/all:-5.1f}% correct, "
