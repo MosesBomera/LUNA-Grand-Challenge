@@ -203,7 +203,10 @@ class LunaDataset(Dataset):
             random.shuffle(self.pos_list)
 
     def __len__(self):
-        return len(self.candidateInfo_list)
+        if self.ratio_int:
+            return 200000
+        else:
+            return len(self.candidateInfo_list)
 
     def __getitem__(self, ndx):
         # Index the, or so to say, get the candidate from the list.
@@ -219,7 +222,7 @@ class LunaDataset(Dataset):
                 candidateInfo_tup = self.pos_list[pos_ndx]
         else:
             candidateInfo_tup = self.candidateInfo_list[ndx]
-            
+
         width_irc = (32, 48, 48)
 
         candidate_a, center_irc = getCtRawCandidate(
