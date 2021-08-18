@@ -162,6 +162,7 @@ class LunaDataset(Dataset):
         val_stride=0,
         isValSet_bool=None,
         series_uid=None,
+        ratio_int:"Define the ratio by which the instances are presented to model"=0,
     ):
         self.candidateInfo_list = copy.copy(getCandidateInfoList())
 
