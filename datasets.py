@@ -165,6 +165,7 @@ class LunaDataset(Dataset):
         ratio_int:"Define the ratio by which the instances are presented to model"=0,
     ):
         self.candidateInfo_list = copy.copy(getCandidateInfoList())
+        self.ratio_int = ratio_int
 
         # Extract nodule info for a given series_uid (CT).
         if series_uid:
@@ -180,6 +181,14 @@ class LunaDataset(Dataset):
         elif val_stride > 0:
             del self.candidateInfo_list[::val_stride]
             assert self.candidateInfo_list
+
+        # Track instances by label
+        self.negative_list = [
+            nt for nt in self.candidateInfo_list if not nt.isNodule_bool
+        ]
+        self.pos_list = [
+            nt for nt in self.candidateInfo_list if nt.isNodule_bool
+        ]
 
         log.info("{!r}: {} {} samples".format(
             self,
