@@ -196,6 +196,12 @@ class LunaDataset(Dataset):
             "validation" if isValSet_bool else "training"
         ))
 
+    def shuffleSamples(self):
+        # Shuffle the instances
+        if self.ratio_int:
+            random.shuffle(self.negative_list)
+            random.shuffle(self.pos_list)
+
     def __len__(self):
         return len(self.candidateInfo_list)
 
