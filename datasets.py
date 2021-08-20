@@ -14,7 +14,7 @@ import torch
 import torch.cuda
 from torch.utils.data import Dataset
 
-# from util.disk import getCache
+from .util.disk import getCache
 from .util.util import XyzTuple, xyz2irc
 from .util.logconf import logging
 
@@ -23,7 +23,7 @@ log.setLevel(logging.WARN)
 log.setLevel(logging.INFO)
 log.setLevel(logging.DEBUG)
 
-# raw_cache = getCache('luna_raw')
+raw_cache = getCache('cache')
 
 # We work within the directory with the raw data.
 ## LOOK OUT FOR THIS PART.
@@ -36,7 +36,7 @@ CandidateInfoTuple = namedtuple(
     'isNodule_bool, diameter_mm, series_uid, center_xyz',
 )
 
-# @functools.lru_cache(1)
+@functools.lru_cache(1)
 def getCandidateInfoList(requireOnDisk_bool=True):
     # We construct a set with all series_uids that are present on disk.
     # This will let us use the data, even if we haven't downloaded all of
@@ -90,7 +90,7 @@ def getCandidateInfoList(requireOnDisk_bool=True):
 class Ct:
     def __init__(self, series_uid):
         mhd_path = glob.glob(
-            f"{data_dir}/subset*/subset*/{series_uid}.mhd"
+            f"{data_dir}/subset*/{series_uid}.mhd"
         )[0]
 
         ct_mhd = sitk.ReadImage(mhd_path)
@@ -143,11 +143,11 @@ class Ct:
         return ct_chunk, center_irc
 
 
-# @functools.lru_cache(1, typed=True)
+@functools.lru_cache(1, typed=True)
 def getCt(series_uid):
     return Ct(series_uid)
 
-# @raw_cache.memoize(typed=True)
+@raw_cache.memoize(typed=True)
 def getCtRawCandidate(series_uid, center_xyz, width_irc):
     ct = getCt(series_uid)
     ct_chunk, center_irc = ct.getRawCandidate(center_xyz, width_irc)

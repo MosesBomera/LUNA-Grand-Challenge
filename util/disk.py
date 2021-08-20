@@ -11,7 +11,7 @@ log.setLevel(logging.INFO)
 # log.setLevel(logging.DEBUG)
 
 # Cache Directory
-data_dir  = '/datadrive/LUNA'
+data_dir  = '../input/luna16dlwpt'
 
 
 class GzipDisk(Disk):
