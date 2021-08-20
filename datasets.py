@@ -29,7 +29,7 @@ raw_cache = getCache('cache')
 ## LOOK OUT FOR THIS PART.
 # data_dir  = '/content/luna_dataset'
 # Change to reflect kaggle directory system.
-data_dir = "../input/luna16dlwpt"
+data_dir = "../input/luna16dlwpt/LUNA"
 
 CandidateInfoTuple = namedtuple(
     'CandidateInfoTuple',
