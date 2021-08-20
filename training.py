@@ -100,8 +100,7 @@ class LunaTrainingApp:
         # Training Dataset
         train_ds = LunaDataset(
             val_stride=10,
-            isValSet_bool=False,
-            # ratio_int=int(self.cli_args.balanced),
+            isValSet_bool=False
         )
 
         batch_size = self.cli_args.batch_size
