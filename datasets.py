@@ -58,7 +58,7 @@ def getCandidateInfoList(requireOnDisk_bool=True):
 
     candidateInfo_list = []
 
-    with open(f'{data_dir}/candidates_V2.csv', "r") as f:
+    with open(f'{data_dir}/candidates_V2/candidates_V2.csv', "r") as f:
         for row in list(csv.reader(f))[1:]:
             series_uid = row[0]
 
