@@ -11,7 +11,7 @@ log.setLevel(logging.INFO)
 # log.setLevel(logging.DEBUG)
 
 # Cache Directory
-data_dir  = '../input/luna16dlwpt'
+cache_dir  = '/kaggle/working'
 
 
 class GzipDisk(Disk):
@@ -82,7 +82,7 @@ class GzipDisk(Disk):
         return value
 
 def getCache(scope_str):
-    return FanoutCache(f'{data_dir}/cache/' + scope_str,
+    return FanoutCache(f'{cache_dir}/cache/' + scope_str,
                        disk=GzipDisk,
                        shards=64,
                        timeout=1,
