@@ -94,7 +94,7 @@ def getCandidateInfoList(requireOnDisk_bool=True):
 class Ct:
     def __init__(self, series_uid):
         mhd_path = glob.glob(
-            f"{data_dir}/subset*/{series_uid}.mhd"
+            f"{data_dir}/subset*/subset*/{series_uid}.mhd"
         )[0]
         # Gets the path as a string.
 
