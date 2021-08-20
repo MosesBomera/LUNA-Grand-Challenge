@@ -94,7 +94,7 @@ def getCandidateInfoList(requireOnDisk_bool=True):
 class Ct:
     def __init__(self, series_uid):
         ## Debugging
-        print(series_uid)
+       log.info("Current Series UID: {}".format(series_uid))
         
         mhd_path = glob.glob(
             f"{data_dir}/subset*/subset*/{series_uid}.mhd"
