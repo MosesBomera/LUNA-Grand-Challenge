@@ -230,7 +230,7 @@ class LunaDataset(Dataset):
         else:
             candidateInfo_tup = self.candidateInfo_list[ndx]
 
-        candidateInfo_tup = self.candidateInfo_list[ndx]
+        # candidateInfo_tup = self.candidateInfo_list[ndx] # Bug
         width_irc = (32, 48, 48)
 
         candidate_a, center_irc = getCtRawCandidate(
