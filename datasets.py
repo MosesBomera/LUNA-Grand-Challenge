@@ -12,6 +12,7 @@ import numpy as np
 
 import torch
 import torch.cuda
+import torch.nn.functional as F
 from torch.utils.data import Dataset
 
 from .util.disk import getCache
@@ -154,6 +155,76 @@ def getCtRawCandidate(series_uid, center_xyz, width_irc):
     return ct_chunk, center_irc
 
 
+# Augmentation
+def getCtAugmentedCandidate(
+    augmentation_dict,
+    series_uid, center_xyz, width_irc,
+    use_cache=True):
+    if use_cache:
+        ct_chunk, center_irc = getCtRawCandidate(series_uid, center_xyz, width_irc)
+    else:
+        ct = getCt(series_uid)
+        ct_chunk, center_irc = ct.getRawCandidate(center_xyz, width_irc)
+
+    ct_t = torch.tensor(ct_chunk).unsqueeze(0).unsqueeze(0).to(torch.float32)
+
+    transform_t = torch.eye(4)
+    # ...
+
+    # Refer to resource https://en.wikipedia.org/wiki/Transformation_matrix#Affine_transformations
+    # for insights on affine transformations.
+
+    for i in range(3):
+        if 'flip' in augmentation_dict:
+            if random.random() > 0.5:
+                transform_t[i,i] *= -1
+
+        if 'offset' in augmentation_dict:
+            offset_float = augmentation_dict['offset']
+            random_float = (random.random() * 2 - 1)
+            transform_t[i,3] = offset_float * random_float
+
+        if 'scale' in augmentation_dict:
+            scale_float = augmentation_dict['scale']
+            random_float = (random.random() * 2 - 1)
+            transform_t[i,i] *= 1.0 + scale_float * random_float
+
+
+    if 'rotate' in augmentation_dict:
+        angle_rad = random.random() * math.pi * 2
+        s = math.sin(angle_rad)
+        c = math.cos(angle_rad)
+
+        rotation_t = torch.tensor([
+            [c, -s, 0, 0],
+            [s, c, 0, 0],
+            [0, 0, 1, 0],
+            [0, 0, 0, 1],
+        ])
+
+        transform_t @= rotation_t
+
+    affine_t = F.affine_grid(
+            transform_t[:3].unsqueeze(0).to(torch.float32),
+            ct_t.size(),
+            align_corners=False,
+        )
+
+    augmented_chunk = F.grid_sample(
+            ct_t,
+            affine_t,
+            padding_mode='border',
+            align_corners=False,
+        ).to('cpu')
+
+    if 'noise' in augmentation_dict:
+        noise_t = torch.randn_like(augmented_chunk)
+        noise_t *= augmentation_dict['noise']
+
+        augmented_chunk += noise_t
+
+    return augmented_chunk[0], center_irc
+
 class LunaDataset(Dataset):
     def __init__(self,
                  val_stride=0,
@@ -161,9 +232,18 @@ class LunaDataset(Dataset):
                  series_uid=None,
                  sortby_str='random',
                  ratio_int=0,
+                 augmentation_dict=None,
+                 candidateInfo_list=None,
             ):
         self.ratio_int = ratio_int
-        self.candidateInfo_list = copy.copy(getCandidateInfoList())
+        self.augmentation_dict = augmentation_dict
+
+        if candidateInfo_list:
+            self.candidateInfo_list = copy.copy(candidateInfo_list)
+            self.use_cache = False
+        else:
+            self.candidateInfo_list = copy.copy(getCandidateInfoList())
+            self.use_cache = True
 
         if series_uid:
             self.candidateInfo_list = [
@@ -227,16 +307,32 @@ class LunaDataset(Dataset):
         else:
             candidateInfo_tup = self.candidateInfo_list[ndx]
 
-        # candidateInfo_tup = self.candidateInfo_list[ndx] # Bug
         width_irc = (32, 48, 48)
 
-        candidate_a, center_irc = getCtRawCandidate(
-            candidateInfo_tup.series_uid,
-            candidateInfo_tup.center_xyz,
-            width_irc,
-        )
-        candidate_t = torch.from_numpy(candidate_a).to(torch.float32)
-        candidate_t = candidate_t.unsqueeze(0)
+        if self.augmentation_dict:
+            candidate_t, center_irc = getCtAugmentedCandidate(
+                self.augmentation_dict,
+                candidateInfo_tup.series_uid,
+                candidateInfo_tup.center_xyz,
+                width_irc,
+                self.use_cache,
+            )
+        elif self.use_cache:
+            candidate_a, center_irc = getCtRawCandidate(
+                candidateInfo_tup.series_uid,
+                candidateInfo_tup.center_xyz,
+                width_irc,
+            )
+            candidate_t = torch.from_numpy(candidate_a).to(torch.float32)
+            candidate_t = candidate_t.unsqueeze(0)
+        else:
+            ct = getCt(candidateInfo_tup.series_uid)
+            candidate_a, center_irc = ct.getRawCandidate(
+                candidateInfo_tup.center_xyz,
+                width_irc,
+            )
+            candidate_t = torch.from_numpy(candidate_a).to(torch.float32)
+            candidate_t = candidate_t.unsqueeze(0)
 
         pos_t = torch.tensor([
                 not candidateInfo_tup.isNodule_bool,
