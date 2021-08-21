@@ -177,6 +177,7 @@ class LunaTrainingApp:
     
     def doTraining(self, epoch_ndx, train_dl):
         self.model.train() # Sets the mode to training.
+        train_dl.dataset.shuffleSamples()
         trnMetrics_g = torch.zeros(  # Initializes a zeros metrics array.
             METRICS_SIZE,  
             len(train_dl.dataset),
