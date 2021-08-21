@@ -171,6 +171,9 @@ def getCtAugmentedCandidate(
     transform_t = torch.eye(4)
     # ...
 
+    # Refer to resource https://en.wikipedia.org/wiki/Transformation_matrix#Affine_transformations
+    # for insights on affine transformations.
+
     for i in range(3):
         if 'flip' in augmentation_dict:
             if random.random() > 0.5:
@@ -303,7 +306,7 @@ class LunaDataset(Dataset):
                 candidateInfo_tup = self.pos_list[pos_ndx]
         else:
             candidateInfo_tup = self.candidateInfo_list[ndx]
-            
+
         width_irc = (32, 48, 48)
 
         if self.augmentation_dict:
