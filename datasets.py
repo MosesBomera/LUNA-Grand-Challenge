@@ -160,7 +160,9 @@ class LunaDataset(Dataset):
                  isValSet_bool=None,
                  series_uid=None,
                  sortby_str='random',
+                 ratio_int=0,
             ):
+        self.ratio_int = ratio_int
         self.candidateInfo_list = copy.copy(getCandidateInfoList())
 
         if series_uid:
@@ -185,16 +187,46 @@ class LunaDataset(Dataset):
         else:
             raise Exception("Unknown sort: " + repr(sortby_str))
 
-        log.info("{!r}: {} {} samples".format(
+        # "Balance out" the dataset
+        self.negative_list = [
+            nt for nt in self.candidateInfo_list if not nt.isNodule_bool
+        ]
+        self.pos_list = [
+            nt for nt in self.candidateInfo_list if nt.isNodule_bool
+        ]
+
+        log.info("{!r}: {} {} samples, {} neg, {} pos, {} ratio".format(
             self,
             len(self.candidateInfo_list),
             "validation" if isValSet_bool else "training",
+            len(self.negative_list),
+            len(self.pos_list),
+            '{}:1'.format(self.ratio_int) if self.ratio_int else 'unbalanced'
         ))
+
+
+    def shuffleSamples(self):
+        if self.ratio_int:
+            random.shuffle(self.negative_list)
+            random.shuffle(self.pos_list)
 
     def __len__(self):
         return len(self.candidateInfo_list)
 
     def __getitem__(self, ndx):
+        if self.ratio_int:
+            pos_ndx = ndx // (self.ratio_int + 1)
+
+            if ndx % (self.ratio_int + 1):
+                neg_ndx = ndx - 1 - pos_ndx
+                neg_ndx %= len(self.negative_list)
+                candidateInfo_tup = self.negative_list[neg_ndx]
+            else:
+                pos_ndx %= len(self.pos_list)
+                candidateInfo_tup = self.pos_list[pos_ndx]
+        else:
+            candidateInfo_tup = self.candidateInfo_list[ndx]
+            
         candidateInfo_tup = self.candidateInfo_list[ndx]
         width_irc = (32, 48, 48)
 
