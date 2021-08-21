@@ -211,9 +211,6 @@ class LunaDataset(Dataset):
             random.shuffle(self.pos_list)
 
     def __len__(self):
-        if self.ratio_int:
-            return 20000
-        else:
             return len(self.candidateInfo_list)
 
     def __getitem__(self, ndx):
